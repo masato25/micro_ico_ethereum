@@ -15,11 +15,11 @@ import (
 type Account struct {
 	gorm.Model
 	UserName                 string `gorm:"type:varchar(100);not null;unique_index`
-	Password                 string
+	Password                 string `json:"-"`
 	EthereumAddress          string
-	EthereumPrivateKeyEncode string
-	EthereumJsonKeyStore     string
-	Sessions                 []Session
+	EthereumPrivateKeyEncode string    `json:"-"`
+	EthereumJsonKeyStore     string    `json:"-"`
+	Sessions                 []Session `json:"-"`
 }
 
 func (self Account) AuthPassword(passstring string) bool {

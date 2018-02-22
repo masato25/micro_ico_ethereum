@@ -1,0 +1,21 @@
+---
+database:
+  debug: true
+  host: localhost
+  port: 5432
+  user: postgres
+  password: password
+  dbname: mie_dev
+web:
+  port: 4000
+  saltPass: pallet123
+ether:
+  address: ""
+  enable: true
+  keyjsonpath: "./config/keys/ethjsonkey"
+  displaymessage: Hello, We are Giraffe, have fun!
+  keypassword: ""
+  ethereum_rpc_host: "http://0.0.0.0:7545"
+  gasfee: 21000
+  time_out_ms: 40000
+...

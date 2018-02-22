@@ -9,6 +9,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/masato25/micro_ico_ethereum/config"
 	"github.com/masato25/micro_ico_ethereum/contracts/token"
@@ -28,19 +29,48 @@ const (
 	password         = `password`
 )
 
+type EthDepolyStruct struct {
+	Address          string
+	Key              string
+	Password         string
+	veryLightScryptN int
+	veryLightScryptP int
+	conn             *ethclient.Client
+	auth             *bind.TransactOpts
+}
+
+func NewEthDepolyStruct(address, key, password string) (*EthDepolyStruct, error) {
+	auth, err := cryptolib.GenerateKeyStore(address, key, password)
+	if err != nil {
+		return nil, err
+	}
+	return &EthDepolyStruct{
+		veryLightScryptN: veryLightScryptN,
+		veryLightScryptP: veryLightScryptP,
+		conn:             conn,
+		auth:             auth,
+	}, nil
+}
+
 func SetTimeOut() {
 	conf := config.MyConfig().Ether
 	timeMs := conf.TimeOutMS
 	d = time.Now().Add(time.Duration(timeMs) * time.Millisecond)
 }
 
-func DepolyContactToBlockChain(totallsupply int64, Name string, tokenSymbol string) {
-	auth, err := cryptolib.GenerateKeyStore(address, key, password)
-	if err != nil {
-		log.Fatalf("Failed to create authorized transactor: %v", err)
-	}
+type DepolyTokenResponse struct {
+	Address  common.Address
+	Tx       *types.Transaction
+	Instance *token.Token
+	Error    error
+}
+
+func (self *EthDepolyStruct) DepolyContactToBlockChain(totallsupply int64, Name string, tokenSymbol string) (response DepolyTokenResponse) {
 	// Deploy a new awesome contract for the binding demo
-	address, tx, tokenc, err := token.DeployToken(auth, conn, big.NewInt(int64(totallsupply)), Name, 0, tokenSymbol)
+	address, tx, tokenc, err := token.DeployToken(self.auth, self.conn, big.NewInt(int64(totallsupply)), Name, 0, tokenSymbol)
+	response = DepolyTokenResponse{
+		address, tx, tokenc, err,
+	}
 	if err != nil {
 		log.Fatalf("Failed to deploy new token contract: %v", err)
 	}
@@ -55,12 +85,13 @@ func DepolyContactToBlockChain(totallsupply int64, Name string, tokenSymbol stri
 		log.Fatalf("Failed to retrieve pending name: %v", err)
 	}
 	fmt.Println("Pending name:", name)
+	return
 }
 
 // 0xf12b5dd4ead5f743c6baa640b0216200e89b60da
-func GetContractName(contractAddr string) {
+func (self *EthDepolyStruct) GetContractName(contractAddr string) {
 	// Instantiate the contract and display its name
-	tokenc, err := token.NewToken(common.HexToAddress(contractAddr), conn)
+	tokenc, err := token.NewToken(common.HexToAddress(contractAddr), self.conn)
 	if err != nil {
 		log.Fatalf("Failed to instantiate a Token contract: %v", err)
 	}
@@ -71,7 +102,7 @@ func GetContractName(contractAddr string) {
 	fmt.Println("Token name:", name)
 }
 
-func invokeContract(contractAddr string, action string) (err error) {
+func (self *EthDepolyStruct) InvokeContract(contractAddr string, action string) (err error) {
 	auth, err := cryptolib.GenerateKeyStore(address, key, password)
 	tokenc, err := token.NewToken(common.HexToAddress(contractAddr), conn)
 	if strings.Contains(action, "transfer") {
@@ -104,8 +135,8 @@ func Conn() (err error) {
 	return
 	// DepolyContactToBlockChain(conn)
 	// GetContractName(conn, "0xf25186b5081ff5ce73482ad761db0eb0d25abfbf")
-	// invokeContract(conn, "0xf25186b5081ff5ce73482ad761db0eb0d25abfbf", "blanceOf")
-	// invokeContract(conn, "0xf25186b5081ff5ce73482ad761db0eb0d25abfbf", "transfer 0xf17f52151EbEF6C7334FAD080c5704D77216b732 200")
+	// InvokeContract(conn, "0xf25186b5081ff5ce73482ad761db0eb0d25abfbf", "blanceOf")
+	// InvokeContract(conn, "0xf25186b5081ff5ce73482ad761db0eb0d25abfbf", "transfer 0xf17f52151EbEF6C7334FAD080c5704D77216b732 200")
 }
 
 func GetConn() *ethclient.Client {

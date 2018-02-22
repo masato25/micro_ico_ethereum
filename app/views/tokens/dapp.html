@@ -1,0 +1,23 @@
+{{ define "content" }}
+<script src="/assets/javascript/tokens_dapp.js" async></script>
+<div class="row justify-content-md-center" id="app">
+  <div class="col-10">
+    <h4>{{ .contractName }} ({{ .symbol }})</h4>
+  </div>
+  <div class="col-10">
+    <span>
+      contract address:
+    </span>
+    <span class="contract_addr">{{ .contractAddr }}</span>
+  </div>
+  <div class="col-10">
+    abi:
+    <textarea rows="4" cols="50" class="contract_abi" disabled>
+      {{ .contractAbi }}
+    </textarea>
+  </div>
+  <div class="col-10">
+    <app></app>
+  </div>
+</div>
+{{ end }}

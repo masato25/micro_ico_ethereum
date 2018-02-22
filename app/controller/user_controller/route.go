@@ -10,8 +10,14 @@ var db *gorm.DB
 
 func Route(r *gin.Engine) {
 	db = setup.GetConn()
+	// html views
+	r.GET("/", Index)
+	r.GET("/register", Register)
+	r.GET("/login", LogIn)
 
 	rapi := r.Group("/api/v1/users")
-	rapi.POST("/", Register)
-	rapi.POST("/login", LogIn)
+	rapi.POST("/resigter", RegisterJSON)
+	rapi.POST("/login", LogInJSON)
+	rapi.GET("/session", SessionCheck)
+	rapi.GET("/logout", LogOut)
 }
